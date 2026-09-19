@@ -1,0 +1,29 @@
+# 敏感配置：API Key 等私密信息，绝不提交
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# 运行时产物
+storage/
+*.db
+*.sqlite3
+
+# 前端（阶段4 工作台）
+node_modules/
+dist/
+.vite/
+
+# IDE
+.idea/
+.vscode/
+*.iml

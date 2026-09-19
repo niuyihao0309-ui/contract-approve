@@ -1,0 +1,101 @@
+:root {
+  --risk-high: #e5484d;
+  --risk-medium: #f5a524;
+  --risk-low: #8b8d98;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f6f8;
+  color: #1f2329;
+}
+
+/* 风险等级色点/徽章 */
+.risk-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.risk-dot.high {
+  background: var(--risk-high);
+}
+.risk-dot.medium {
+  background: var(--risk-medium);
+}
+.risk-dot.low {
+  background: var(--risk-low);
+}
+
+/* 原文高亮 mark */
+mark.hl-high {
+  background: rgba(229, 72, 77, 0.18);
+  border-bottom: 2px solid var(--risk-high);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+mark.hl-medium {
+  background: rgba(245, 165, 36, 0.18);
+  border-bottom: 2px solid var(--risk-medium);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+mark.hl-low {
+  background: rgba(139, 141, 152, 0.14);
+  border-bottom: 2px solid var(--risk-low);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+mark.hl-active {
+  outline: 3px solid #1e90ff;
+  outline-offset: 1px;
+}
+
+/* 文档段落块 */
+.doc-block {
+  position: relative;
+  padding: 4px 8px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-left: 3px solid transparent;
+  transition: background 0.2s;
+}
+.doc-block.is-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 8px;
+}
+.doc-block.is-flash {
+  background: #fff7d6;
+  border-left-color: #f5a524;
+}
+
+.page-sep {
+  margin: 16px 0;
+  text-align: center;
+  color: #98a1b3;
+  font-size: 12px;
+}
+.page-sep::before,
+.page-sep::after {
+  content: '─────';
+  color: #dcdfe6;
+  margin: 0 8px;
+}

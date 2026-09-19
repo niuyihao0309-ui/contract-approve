@@ -1,0 +1,52 @@
+# 合同审批智能审查系统 —— 依赖服务编排
+#
+# 起库：  docker compose up -d mysql
+# 看日志：docker compose logs -f mysql
+# 停掉：  docker compose down          （保留数据卷）
+# 清空：  docker compose down -v       （连数据一起删，慎用）
+#
+# 为什么端口用 3307 而不是 3306：
+#   本项目与你既有的 RAG 技术栈（elasticsearch / qdrant / mysql:8.0 …）是两套独立环境。
+#   既有那套已经占了 3306，这里避让一下，两边可以同时跑、互不影响。
+#   如果你更想复用既有的那个 MySQL，不用起这个容器，只要：
+#     1) 在既有 MySQL 里建库：CREATE DATABASE contract_review DEFAULT CHARSET utf8mb4;
+#     2) 把 .env 里的 APP_DB_URL 端口改回 3306、账号密码换成你那套的即可。
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: xm-contract-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      # 内存硬卡：本机 16GB 板载内存，容器里的 InnoDB 缓冲池压到 256MB 足够本项目用
+      - --innodb-buffer-pool-size=256M
+      - --max-connections=100
+      - --performance-schema=OFF
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: contract_review
+      MYSQL_USER: contract
+      MYSQL_PASSWORD: contract123
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - xm_contract_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # 内存上限，防止 MySQL 把宿主机吃满
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  xm_contract_mysql_data:
+    name: xm_contract_mysql_data
