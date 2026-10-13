@@ -27,3 +27,6 @@ dist/
 .idea/
 .vscode/
 *.iml
+
+# 助手工作数据（本地调试截图、备份等，不入库）
+.workbuddy/

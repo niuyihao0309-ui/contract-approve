@@ -1,10 +1,13 @@
 """ORM 表定义。
 
-按大纲「地基③」的清单落地，共 11 张表（在 10 张核心表基础上补了 ``doc_clause``，
-用于承载条款切分结果 —— 验收标准第 2 条要求条款也要能定位回原文）。
+按大纲「地基③」的清单落地，共 12 张表（在 10 张核心表基础上补了 ``doc_clause``，
+用于承载条款切分结果 —— 验收标准第 2 条要求条款也要能定位回原文；
+后补 ``sys_user`` 承载登录账号与角色）。
 
+    sys_user           登录账号（密码只存 PBKDF2 摘要）
     contract_task      审查任务主表（状态机载体）
     contract_file      附件表（hash 去重）
+    contract_batch_item 上传批次成员（一次传多份文件时把它们归成一批）
     doc_block          文档块（IR 的 blocks 落库）
     doc_clause         条款切分结果（绑定 block_id 区间）
     contract_metadata  核心元数据（带原文定位）
@@ -163,6 +166,43 @@ class ContractFile(Base, TimestampMixin):
     task: Mapped[ContractTask] = relationship(back_populates="files")
 
     __table_args__ = (Index("ix_file_hash_parsed", "file_hash", "parsed"),)
+
+
+# ======================================================================
+# 2.1 上传批次
+# ======================================================================
+class ContractBatchItem(Base, TimestampMixin):
+    """上传批次成员 —— 「一次提交多份文件」时把各自独立的任务归成一批。
+
+    为什么用一张成员表，而不是给 ``contract_task`` 加 ``batch_id`` 列
+    --------------------------------------------------------------
+    本项目开发期靠 ``metadata.create_all`` 建表（无 Alembic），
+    **加列在老库上不会自动生效**（必须手工 ALTER），而新表会被
+    ``create_all`` 自动建出来。所以批次关系放在新表里，零迁移成本。
+
+    为什么一个文件就是一条任务，而不是一个任务挂多份文档
+    --------------------------------------------------
+    整条链路（IR 的 ``doc_id`` / ``(doc_id, block_id)`` 唯一键 / 风险项的
+    ``char_start~char_end`` 定位 / 高亮叠层 / 回写）都是「一份文档一条任务」的模型，
+    硬塞多文档会同时打断定位与高亮。所以多文件 = 多条任务 + 一个批次号，
+    批次只是**展示层的分组**，不参与任何业务计算。
+    """
+
+    __tablename__ = "contract_batch_item"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    #: 批次号（同一批上传的所有成员共用），不建外键 —— 批次是弱实体
+    batch_id: Mapped[str] = mapped_column(String(36), index=True)
+    task_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("contract_task.id", ondelete="CASCADE"), index=True
+    )
+    #: 批次内序号，从 1 开始，决定文件切换条的顺序
+    seq: Mapped[int] = mapped_column(Integer, default=1)
+
+    __table_args__ = (
+        UniqueConstraint("batch_id", "task_id", name="uq_batch_task"),
+        Index("ix_batch_seq", "batch_id", "seq"),
+    )
 
 
 # ======================================================================
@@ -470,7 +510,45 @@ class ClauseTemplate(Base, TimestampMixin):
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
+# ======================================================================
+# 12. 系统用户（登录账号）
+# ======================================================================
+class User(Base, TimestampMixin):
+    """登录账号。
+
+    这张表把「人」和「角色」拆开了：``role`` 决定权限（服务端按
+    ``app/core/permissions.py`` 的矩阵换算），``position`` / ``dept`` 是
+    组织信息，只用于展示与数据范围提示 —— 别用它们去做权限判断。
+
+    密码只存摘要（PBKDF2-HMAC-SHA256 + 随机盐，见 ``app/core/security.py``），
+    任何时候都不落明文、不返给前端。
+    """
+
+    __tablename__ = "sys_user"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+
+    display_name: Mapped[str] = mapped_column(String(64), default="")
+    role: Mapped[str] = mapped_column(String(16), default="operator", index=True)
+    dept: Mapped[str] = mapped_column(String(64), default="")
+    position: Mapped[str] = mapped_column(String(64), default="")       # 职位
+    email: Mapped[str | None] = mapped_column(String(128))
+    phone: Mapped[str | None] = mapped_column(String(32))
+    remark: Mapped[str | None] = mapped_column(String(255))
+
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False)       # 启动种子账号
+
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    login_count: Mapped[int] = mapped_column(Integer, default=0)
+
+    __table_args__ = (Index("ix_user_role_enabled", "role", "enabled"),)
+
+
 __all__ = [
+    "User",
     "ContractTask",
     "ContractFile",
     "DocBlock",

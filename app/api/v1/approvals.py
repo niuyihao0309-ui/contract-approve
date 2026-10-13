@@ -14,10 +14,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, Depends, Query
 
-from app.api.deps import SessionDep
-from app.core.config import settings
+from app.api.deps import SessionDep, require_perm
 from app.core.logging import logger
 from app.integrations.approval_mock import get_approval_mock
 from app.models.enums import TaskSource
@@ -25,7 +24,13 @@ from app.schemas.task import OpResult
 from app.services.file_service import FileService
 from app.services.task_service import TaskService
 
-router = APIRouter(prefix="/approvals", tags=["审批集成(mock)"])
+router = APIRouter(
+    prefix="/approvals",
+    tags=["审批集成(mock)"],
+    # 审批流对接是系统管理员的活儿（配置参数、故障演练、拉取待办）。
+    # 法务与经办人直连接口也会被挡在 403。
+    dependencies=[Depends(require_perm("admin.approval"))],
+)
 
 
 # ----------------------------------------------------------------------
@@ -231,20 +236,8 @@ async def mock_stats() -> dict:
     return get_approval_mock().stats()
 
 
-@router.get("/samples", summary="列出可用的示例合同（演示脚本用）")
-async def list_samples() -> dict:
-    samples_dir = settings.storage_dir.parent / "samples"
-    if not samples_dir.exists():
-        return {"total": 0, "dir": str(samples_dir), "files": []}
-    files = sorted(p for p in samples_dir.iterdir() if p.is_file())
-    return {
-        "total": len(files),
-        "dir": str(samples_dir),
-        "files": [
-            {"name": p.name, "size": p.stat().st_size, "ext": p.suffix, "path": str(p)}
-            for p in files
-        ],
-    }
+# 注意：「示例合同列表」曾经挂在这里，但它与审批对接无关，且上传页（业务经办人）
+# 要用它 —— 放在本文件会跟着 admin.approval 一起被 403。已挪到 `samples.py`。
 
 
 __all__ = ["router"]

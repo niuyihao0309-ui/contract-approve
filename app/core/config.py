@@ -9,7 +9,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 项目根目录：app/core/config.py -> app/core -> app -> 项目根
@@ -31,8 +31,21 @@ class Settings(BaseSettings):
     app_name: str = "合同审批智能审查系统"
     app_version: str = "0.1.0"
     debug: bool = False
-    host: str = "127.0.0.1"
-    port: int = 8000
+    #: 监听地址。本地默认只绑回环；容器/云平台里用 APP_HOST=0.0.0.0。
+    #: 也认平台惯例的裸 `HOST`（设了 validation_alias 之后 env_prefix 不再叠加，
+    #: 所以两个名字都要显式列出来）。
+    host: str = Field(default="127.0.0.1", validation_alias=AliasChoices("APP_HOST", "HOST"))
+    #: 监听端口。**优先级：APP_PORT > PORT > 8000** —— 云平台只注入 PORT，
+    #: 本地 .env 里写的是 APP_PORT，两边都不冲突。
+    port: int = Field(default=8000, validation_alias=AliasChoices("APP_PORT", "PORT"))
+
+    # ---------------- 单端口托管前端（可选）----------------
+    #: 是否由 FastAPI 直接托管前端的构建产物（`frontend/dist`）。
+    #: 本地开发用 vite dev server（5173 + 代理），**默认关闭**，行为与以前完全一致；
+    #: 部署成单端口服务时打开它，一个端口同时提供页面与接口。
+    serve_frontend: bool = False
+    #: 前端构建产物目录（`npm run build` 的产物）
+    frontend_dist: Path = BASE_DIR / "frontend" / "dist"
 
     # ---------------- 数据库 ----------------
     # 默认走 Docker MySQL（见 docker-compose.yml，端口 3307 避让你既有的 RAG 栈）。
@@ -56,6 +69,18 @@ class Settings(BaseSettings):
     storage_dir: Path = BASE_DIR / "storage"
     upload_dir_name: str = "uploads"
     report_dir_name: str = "reports"
+
+    # ---------------- 认证与授权 ----------------
+    #: 令牌签名密钥。**上线前必须换成随机值**（.env 里设 APP_AUTH_SECRET）。
+    #: 留空时用下面这个开发期默认值，日志里会给出提醒。
+    auth_secret: str = "dev-only-change-me-contract-approve"
+    #: 令牌有效期（分钟）
+    auth_token_ttl_minutes: int = 720
+    #: 是否强制服务端鉴权。默认 True —— 前端权限只是呈现层收敛，
+    #: 真正的边界在这里。只有在跑离线脚本/排查时才考虑临时关掉。
+    auth_required: bool = True
+    #: 启动时是否写入演示账号（幂等，已存在则跳过）
+    auth_seed_users: bool = True
 
     # ---------------- LLM（OpenAI 兼容）----------------
     llm_enabled: bool = False
@@ -98,7 +123,7 @@ class Settings(BaseSettings):
     )
     max_upload_mb: int = 50
 
-    @field_validator("storage_dir", "rules_file", "templates_file", mode="after")
+    @field_validator("storage_dir", "rules_file", "templates_file", "frontend_dist", mode="after")
     @classmethod
     def _resolve_path(cls, v: Path) -> Path:
         """相对路径统一按项目根解析，避免受启动时 CWD 影响。"""
@@ -122,6 +147,11 @@ class Settings(BaseSettings):
     def llm_ready(self) -> bool:
         """LLM 是否真正可用：开关打开 + 有 key。"""
         return bool(self.llm_enabled and self.llm_api_key)
+
+    @property
+    def frontend_ready(self) -> bool:
+        """是否可以托管前端：开关打开 + 构建产物确实在（含 index.html）。"""
+        return bool(self.serve_frontend and (self.frontend_dist / "index.html").is_file())
 
 
 @lru_cache(maxsize=1)

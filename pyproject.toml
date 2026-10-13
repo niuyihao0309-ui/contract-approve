@@ -44,9 +44,3 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 110
-
-# uv 默认从清华镜像拉包，避免国内网络超时
-[[tool.uv.index]]
-name = "tuna"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-default = true

@@ -1,0 +1,169 @@
+{
+  "_comment": [
+    "XM-contract-approve 前端「角色 × 页面」回归规格。",
+    "跑法：python \"C:/Users/NYH/.workbuddy/skills/frontend-page-verify-cdp/scripts/verify_pages.py\"",
+    "        --spec scripts/verify_pages.spec.json --base http://localhost:5173 --out docs/screenshots",
+    "前提：后端 uvicorn 在 8000（登录接口要能通）；前端 dev server 端口写进 --base（5173 常被旧进程占用，vite 会自动退到 5174）。",
+    "鉴权方式：本项目已上登录体系，所以配 auth 段 —— 每个角色会**真登录一次**拿令牌，",
+    "         再把登录态种进 localStorage[ca.auth]（与前端 store 的持久化格式一致）。",
+    "menus / denied / allowed / contains 都是「实测通过值」，改动权限或页面文案后必须同步更新，否则回归会误报。",
+    "wait_for 是一段返回真值的 JS，用来等异步数据到位（表格数据是异步拉的，不等会出假 FAIL）。",
+    "注意：数据依赖的按钮（如仅阻塞任务才渲染的「重新审查」）刻意不纳入基线；",
+    "allowed 断言的是「没被 v-perm 禁用」—— 用来防止权限放松/收紧搞反方向。"
+  ],
+  "base": "http://localhost:5173",
+  "storageKey": "ca.current_role",
+  "auth": {
+    "loginUrl": "http://127.0.0.1:8000/api/v1/auth/login",
+    "storageKey": "ca.auth",
+    "accounts": {
+      "lawyer": { "username": "li.jing", "password": "lawyer123" },
+      "operator": { "username": "zhang.wei", "password": "operator123" },
+      "admin": { "username": "admin", "password": "admin123" }
+    }
+  },
+  "viewport": { "width": 1600, "height": 1000 },
+  "anon": [
+    {
+      "path": "/",
+      "expect_path": "/login",
+      "h1": "登录",
+      "contains": ["快捷登录"],
+      "shot": "00_login.png"
+    },
+    { "path": "/rules", "expect_path": "/login" },
+    { "path": "/engine", "expect_path": "/login" },
+    { "path": "/upload", "expect_path": "/login" }
+  ],
+  "roles": {
+    "lawyer": {
+      "allow": [
+        {
+          "path": "/",
+          "h2": "审查大盘",
+          "menus": ["审查大盘", "规则与模板", "角色与权限"],
+          "wait_for": "document.querySelectorAll('.el-table__body-wrapper tbody tr').length > 0",
+          "select_rows": 1,
+          "denied": ["批量重新审查", "批量执行流水线", "批量删除"],
+          "shot": "01_dashboard_lawyer.png"
+        },
+        {
+          "path": "/rules",
+          "h2": "规则与模板",
+          "menus": ["审查大盘", "规则与模板", "角色与权限"],
+          "denied": ["编辑条件", "从 JSON 同步", "新建模板"],
+          "shot": "06_rules_lawyer.png"
+        },
+        {
+          "path": "/permissions",
+          "h2": "角色与权限",
+          "menus": ["审查大盘", "规则与模板", "角色与权限"],
+          "contains": ["账号管理需要"],
+          "shot": "02_permissions_lawyer.png"
+        },
+        {
+          "path": "/tasks/{taskId}",
+          "menus": ["审查大盘", "规则与模板", "角色与权限"],
+          "contains": ["风险清单与建议"],
+          "denied": ["跑流水线", "重新解析", "重新审查"],
+          "shot": "10_workbench_lawyer.png"
+        }
+      ],
+      "deny": [
+        { "path": "/upload", "need": "提交合同审查申请", "shot": "03_403_lawyer_upload.png" },
+        { "path": "/engine", "need": "查看引擎状态与自检结果" }
+      ]
+    },
+    "operator": {
+      "allow": [
+        {
+          "path": "/",
+          "h2": "审查大盘",
+          "menus": ["审查大盘", "上传合同", "角色与权限"],
+          "wait_for": "document.querySelectorAll('.el-table__body-wrapper tbody tr').length > 0",
+          "select_rows": 1,
+          "denied": ["批量重新审查", "批量执行流水线", "批量删除"],
+          "shot": "04_dashboard_operator.png"
+        },
+        {
+          "path": "/upload",
+          "h2": "上传合同",
+          "menus": ["审查大盘", "上传合同", "角色与权限"],
+          "shot": "08_upload_operator.png"
+        },
+        {
+          "path": "/tasks/{taskId}",
+          "menus": ["审查大盘", "上传合同", "角色与权限"],
+          "contains": ["只读视图"],
+          "denied": ["跑流水线", "重新解析", "重新审查"],
+          "shot": "11_workbench_operator.png"
+        }
+      ],
+      "deny": [
+        { "path": "/rules", "need": "查看审查规则与标准条款库" },
+        { "path": "/engine", "need": "查看引擎状态与自检结果" }
+      ]
+    },
+    "admin": {
+      "allow": [
+        {
+          "path": "/",
+          "h2": "审查大盘",
+          "menus": ["审查大盘", "规则与模板", "引擎状态", "角色与权限"],
+          "wait_for": "document.querySelectorAll('.el-table__body-wrapper tbody tr').length > 0",
+          "select_rows": 1,
+          "allowed": ["批量重新审查", "批量执行流水线", "批量删除"],
+          "shot": "05_dashboard_admin.png"
+        },
+        {
+          "path": "/rules",
+          "h2": "规则与模板",
+          "menus": ["审查大盘", "规则与模板", "引擎状态", "角色与权限"],
+          "allowed": ["编辑条件", "从 JSON 同步", "新建模板"],
+          "shot": "07_rules_admin.png"
+        },
+        {
+          "path": "/engine",
+          "h2": "审查引擎状态",
+          "menus": ["审查大盘", "规则与模板", "引擎状态", "角色与权限"],
+          "shot": "09_engine_admin.png"
+        },
+        {
+          "path": "/permissions",
+          "h2": "角色与权限",
+          "menus": ["审查大盘", "规则与模板", "引擎状态", "角色与权限"],
+          "wait_for": "document.querySelectorAll('.el-table__body-wrapper tbody tr').length > 0",
+          "contains": ["登录账号", "li.jing"],
+          "shot": "15_permissions_admin.png"
+        },
+        {
+          "path": "/tasks/{taskId}",
+          "menus": ["审查大盘", "规则与模板", "引擎状态", "角色与权限"],
+          "contains": ["只读视图"],
+          "allowed": ["跑流水线", "重新解析", "重新审查"],
+          "shot": "12_workbench_admin.png"
+        }
+      ],
+      "deny": []
+    }
+  },
+  "switches": [
+    {
+      "_comment": "登录体系下没有「原地切身份」，等价动作是换账号重新登录后进同一页",
+      "from": "admin",
+      "to": "lawyer",
+      "path": "/rules",
+      "expect_path": "/rules",
+      "denied": ["编辑条件", "从 JSON 同步", "新建模板"],
+      "shot": "13_switch_admin_to_lawyer.png"
+    },
+    {
+      "from": "lawyer",
+      "to": "admin",
+      "path": "/rules",
+      "expect_path": "/rules",
+      "allowed": ["编辑条件", "从 JSON 同步", "新建模板"],
+      "shot": "14_switch_lawyer_to_admin.png"
+    }
+  ]
+}

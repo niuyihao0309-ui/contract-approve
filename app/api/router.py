@@ -6,20 +6,28 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     approvals,
+    auth,
     documents,
     health,
     reports,
     reviews,
     risks,
     rules,
+    samples,
     tasks,
     writeback,
 )
 
 api_router = APIRouter()
 
+# 认证与账号（登录页 / 身份 / 账号维护）
+api_router.include_router(auth.router)
+
 # 系统
 api_router.include_router(health.router)
+
+# 示例合同（上传页「一键试跑」用，全角色可读）
+api_router.include_router(samples.router)
 
 # 审查任务（大盘 / 工作台主入口）
 api_router.include_router(tasks.router)

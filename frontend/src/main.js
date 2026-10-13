@@ -7,6 +7,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'
 import router from './router'
+import permDirective from './directives/perm'
 import './styles.css'
 
 const app = createApp(App)
@@ -19,5 +20,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
+// v-perm：按当前身份收敛界面入口（详见 directives/perm.js）
+app.directive('perm', permDirective)
 
 app.mount('#app')

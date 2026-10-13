@@ -1,7 +1,44 @@
+/* ======================================================================
+   全局样式：商务简约
+   - 收敛色板：白底 / 细描边 / 单一克制主色，去掉渐变与重投影
+   - ⚠️ 风险等级色（--risk-high/medium/low）与 mark.hl-* / .doc-block /
+     .perm-denied 等功能类名保持不变 —— 它们是业务语义与验收脚本的依赖
+   ====================================================================== */
+
 :root {
+  /* ---- 业务语义色（勿改） ---- */
   --risk-high: #e5484d;
   --risk-medium: #f5a524;
   --risk-low: #8b8d98;
+
+  /* ---- 商务简约设计令牌 ---- */
+  --ink-1: #1f2329; /* 主文字 */
+  --ink-2: #4b5563; /* 次级文字 */
+  --ink-3: #8b93a1; /* 弱化文字 */
+  --line: #e8eaed; /* 主描边 */
+  --line-soft: #f0f2f5; /* 次级分隔线 */
+  --surface: #ffffff; /* 卡片底 */
+  --canvas: #f6f7f9; /* 页面底 */
+  --radius: 8px;
+  --radius-sm: 6px;
+
+  /* ---- Element Plus 主色收敛（覆盖默认 #409eff 系） ---- */
+  --el-color-primary: #2563eb;
+  --el-color-primary-light-3: #5b86ea;
+  --el-color-primary-light-5: #8fabf0;
+  --el-color-primary-light-7: #c3d1f6;
+  --el-color-primary-light-8: #d9e1f9;
+  --el-color-primary-light-9: #eef2fd;
+  --el-color-primary-dark-2: #1d4ed8;
+
+  --el-border-radius-base: 6px;
+  --el-text-color-primary: var(--ink-1);
+  --el-text-color-regular: var(--ink-2);
+  --el-border-color: var(--line);
+  --el-border-color-light: var(--line);
+  --el-border-color-lighter: var(--line-soft);
+  --el-fill-color-blank: var(--surface);
+  --el-box-shadow-light: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 * {
@@ -15,15 +52,25 @@ body,
   padding: 0;
   height: 100%;
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-  background: #f5f6f8;
-  color: #1f2329;
+  background: var(--canvas);
+  color: var(--ink-1);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* 风险等级色点/徽章 */
+/* 卡片：统一的细描边 + 极轻投影，不抢视线 */
+.el-card {
+  border-color: var(--line);
+  border-radius: var(--radius);
+}
+
+/* ---------------------------------------------------------------- */
+/* 风险等级色点 / 徽章                                              */
+/* ---------------------------------------------------------------- */
 .risk-dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   margin-right: 6px;
 }
@@ -37,9 +84,11 @@ body,
   background: var(--risk-low);
 }
 
-/* 原文高亮 mark */
+/* ---------------------------------------------------------------- */
+/* 原文高亮 mark（叠层实现，勿改结构）                              */
+/* ---------------------------------------------------------------- */
 mark.hl-high {
-  background: rgba(229, 72, 77, 0.18);
+  background: rgba(229, 72, 77, 0.16);
   border-bottom: 2px solid var(--risk-high);
   color: inherit;
   padding: 0 1px;
@@ -47,7 +96,7 @@ mark.hl-high {
   cursor: pointer;
 }
 mark.hl-medium {
-  background: rgba(245, 165, 36, 0.18);
+  background: rgba(245, 165, 36, 0.16);
   border-bottom: 2px solid var(--risk-medium);
   color: inherit;
   padding: 0 1px;
@@ -63,11 +112,13 @@ mark.hl-low {
   cursor: pointer;
 }
 mark.hl-active {
-  outline: 3px solid #1e90ff;
+  outline: 2px solid var(--el-color-primary);
   outline-offset: 1px;
 }
 
-/* 文档段落块 */
+/* ---------------------------------------------------------------- */
+/* 文档段落块                                                       */
+/* ---------------------------------------------------------------- */
 .doc-block {
   position: relative;
   padding: 4px 8px;
@@ -83,19 +134,51 @@ mark.hl-active {
   margin-top: 8px;
 }
 .doc-block.is-flash {
-  background: #fff7d6;
-  border-left-color: #f5a524;
+  background: #fff8e2;
+  border-left-color: var(--risk-medium);
 }
 
+/* 分页分隔：只留一行淡字，去掉装饰线 */
 .page-sep {
-  margin: 16px 0;
+  margin: 14px 0;
   text-align: center;
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
+  letter-spacing: 0.5px;
 }
-.page-sep::before,
-.page-sep::after {
-  content: '─────';
-  color: #dcdfe6;
-  margin: 0 8px;
+
+/* 文本层高亮容器：内层滚动，免得长合同把整页撑开
+   （组件里 inline 设了 maxHeight，但没有 overflow 就不会滚） */
+.highlight-doc {
+  max-height: 72vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 6px;
+}
+
+/* 无权限的入口：保留位置但视觉上「用不了」，鼠标提示缺哪个权限 */
+.perm-denied {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.6);
+}
+.perm-denied * {
+  pointer-events: none !important;
+}
+
+/* 表格里的弱化文本 */
+.ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* 报告 / 条款全文预览弹窗 */
+.tpl-preview {
+  max-width: 760px;
 }

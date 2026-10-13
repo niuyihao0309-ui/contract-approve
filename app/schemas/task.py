@@ -37,6 +37,9 @@ class TaskBrief(BaseModel):
     progress: int = 0
     block_reason: str | None = None
     block_reason_label: str | None = None
+    #: 阻塞明细。需求要求「管理员在列表页就能看到阻塞原因」，
+    #: 所以列表行也带上它，不用先点进工作台。
+    block_detail: str | None = None
     retry_count: int = 0
 
     overall_risk: str | None = None
@@ -54,8 +57,16 @@ class TaskBrief(BaseModel):
     completed_at: datetime | None = None
     duration_ms: int | None = None
 
+    #: 上传批次：一次提交多份文件时，每份文件各是一条任务，用批次号归组。
+    #: ``batch_total <= 1`` 表示「不属于批次」，前端据此决定要不要打批次标。
+    batch_id: str | None = None
+    batch_seq: int | None = None
+    batch_total: int | None = None
+
     @classmethod
-    def from_orm_task(cls, task: Any) -> "TaskBrief":
+    def from_orm_task(cls, task: Any, batch: dict | None = None) -> "TaskBrief":
+        """``batch`` 由 :meth:`BatchService.annotate` 提供（列表页批量查，避免逐行查库）。"""
+        batch = batch or {}
         return cls(
             id=task.id,
             title=task.title,
@@ -74,6 +85,7 @@ class TaskBrief(BaseModel):
             block_reason_label=(
                 BLOCK_REASON_LABEL.get(task.block_reason) if task.block_reason else None
             ),
+            block_detail=task.block_detail,
             retry_count=task.retry_count or 0,
             overall_risk=task.overall_risk,
             overall_risk_label=(
@@ -91,6 +103,9 @@ class TaskBrief(BaseModel):
             created_at=task.created_at,
             completed_at=task.completed_at,
             duration_ms=task.duration_ms,
+            batch_id=batch.get("batch_id"),
+            batch_seq=batch.get("batch_seq"),
+            batch_total=batch.get("batch_total"),
         )
 
 
@@ -107,6 +122,22 @@ class TaskDetail(TaskBrief):
     comments: list[dict] = Field(default_factory=list)
     writeback: dict | None = None
     doc: dict | None = None
+    #: 上传批次上下文（成员、序号、各自风险统计）；不属于多文件批次时为 None
+    batch: dict | None = None
+
+
+class BatchUploadOut(BaseModel):
+    """一次上传多份文件的返回。
+
+    文件之间**各自独立**（每条任务一份文档），批次只用于展示分组。
+    ``tasks`` 与 ``batch.items`` 内容有交叠：前者是任务摘要（跳转/建单用），
+    后者是批次上下文（文件切换条用，带文件名与风险数）。
+    """
+
+    batch_id: str
+    total: int
+    tasks: list[TaskBrief] = Field(default_factory=list)
+    batch: dict | None = None
 
 
 class TaskCreateIn(BaseModel):
@@ -169,6 +200,7 @@ __all__ = [
     "TaskDetail",
     "TaskCreateIn",
     "TaskListOut",
+    "BatchUploadOut",
     "CommentIn",
     "DecisionIn",
     "RetryIn",

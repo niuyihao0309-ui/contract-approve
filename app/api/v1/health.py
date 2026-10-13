@@ -21,6 +21,10 @@ async def health() -> dict:
         "db": "configured",
         "llm_ready": settings.llm_ready,
         "llm_model": settings.llm_model if settings.llm_ready else None,
+        # 能力开关随健康检查下发：上传页在**选文件那一刻**就能提示
+        # 「本部署没开 OCR，图片/扫描件提交后必然落到解析受阻」，而不是提交完才爆红。
+        # 与 llm_ready 同级公开（都是部署能力位，不含敏感信息）。
+        "ocr_enabled": settings.ocr_enabled,
     }
 
 

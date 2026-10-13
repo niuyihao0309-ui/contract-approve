@@ -117,9 +117,71 @@ class ClauseTemplateLibrary(BaseModel):
     templates: list[ClauseTemplateModel] = Field(default_factory=list)
 
 
+# ======================================================================
+# 规则配置页的入参（只带需要改的字段，None = 不动）
+# ======================================================================
+class RulePatchIn(BaseModel):
+    """规则条件编辑表单。
+
+    ``None`` 表示「本次不改这个字段」——这样前端可以只提交开关，
+    也可以提交整张表单，后端行为一致。
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    name: str | None = None
+    category: str | None = None
+    description: str | None = None
+    risk_level: RiskLevel | None = None
+    trigger: RuleTrigger | None = None
+    patterns: list[str] | None = None
+    exclude_patterns: list[str] | None = None
+    params: dict | None = None
+    contract_types: list[str] | None = None
+    clause_types: list[str] | None = None
+    reason: str | None = None
+    legal_basis: str | None = None
+    suggestion_template: str | None = None
+    tags: list[str] | None = None
+    priority: int | None = None
+    enabled: bool | None = None
+
+    @field_validator("clause_types")
+    @classmethod
+    def _check_clause_types(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return v
+        valid = {t.value for t in ClauseType}
+        bad = [t for t in v if t not in valid]
+        if bad:
+            raise ValueError(f"未知的 clause_type：{bad}，可选 {sorted(valid)}")
+        return v
+
+
+class ClauseTemplateIn(BaseModel):
+    """示范条款模板的新建 / 编辑表单。"""
+
+    model_config = ConfigDict(extra="ignore")
+
+    template_id: str | None = Field(default=None, description="不传则自动生成")
+    title: str = Field(..., min_length=1, max_length=200)
+    clause_type: ClauseType = ClauseType.OTHER
+    contract_types: list[str] = Field(default_factory=list)
+    content: str = ""
+    tags: list[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
+    scenario: str = ""
+    risk_level: RiskLevel = RiskLevel.MEDIUM
+    legal_basis: str = ""
+    version: str = "1.0"
+    enabled: bool = True
+
+
 __all__ = [
     "ReviewRuleModel",
     "ReviewRuleSet",
     "ClauseTemplateModel",
     "ClauseTemplateLibrary",
+    "RulePatchIn",
+    "ClauseTemplateIn",
 ]

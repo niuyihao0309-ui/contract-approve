@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from enum import Enum
 from pathlib import Path
 
 from sqlalchemy import select
@@ -24,7 +25,14 @@ from app.core.logging import logger
 from app.db.base import session_scope
 from app.engines.recommend.recommender import ClauseLibrary
 from app.engines.review.rule_engine import RuleEngine
-from app.models.enums import ClauseType, RiskLevel, RuleTrigger
+from app.models.enums import (
+    CLAUSE_TYPE_LABEL,
+    CONTRACT_TYPE_LABEL,
+    RISK_LEVEL_LABEL,
+    ClauseType,
+    RiskLevel,
+    RuleTrigger,
+)
 from app.models.tables import ClauseTemplate, ReviewRule
 from app.schemas.rule import (
     ClauseTemplateLibrary,
@@ -203,15 +211,153 @@ class RuleService:
     async def set_rule_enabled(
         session: AsyncSession, rule_id: str, enabled: bool
     ) -> ReviewRule:
+        row = await RuleService.get_rule(session, rule_id)
+        row.enabled = enabled
+        await session.flush()
+        logger.info(f"[规则] {rule_id} → {'启用' if enabled else '停用'}")
+        return row
+
+    @staticmethod
+    async def get_rule(session: AsyncSession, rule_id: str) -> ReviewRule:
         row = (
             await session.execute(select(ReviewRule).where(ReviewRule.rule_id == rule_id))
         ).scalar_one_or_none()
         if row is None:
             raise AppError(f"规则不存在：{rule_id}")
-        row.enabled = enabled
-        await session.flush()
-        logger.info(f"[规则] {rule_id} → {'启用' if enabled else '停用'}")
         return row
+
+    #: 规则配置页允许编辑的字段（其余字段由 JSON 同步刷新，界面不改）
+    RULE_EDITABLE_FIELDS: tuple[str, ...] = (
+        "name", "category", "description", "risk_level", "trigger",
+        "patterns", "exclude_patterns", "params", "contract_types", "clause_types",
+        "reason", "legal_basis", "suggestion_template", "tags", "priority", "enabled",
+    )
+
+    @staticmethod
+    async def update_rule(session: AsyncSession, rule_id: str, patch) -> ReviewRule:
+        """条件编辑表单的落库入口。只写显式提交的字段（None = 不改）。
+
+        注意 ``checker`` 不开放编辑：它指向 ``checkers.py`` 里的 Python 函数，
+        改错了规则会在运行期直接报错，属于代码级改动而非配置。
+        """
+        row = await RuleService.get_rule(session, rule_id)
+        data = patch.model_dump(exclude_unset=True, exclude_none=True)
+        for field in RuleService.RULE_EDITABLE_FIELDS:
+            if field in data:
+                setattr(row, field, _as_value(data[field]))
+        await session.flush()
+        logger.info(f"[规则] {rule_id} 已更新字段：{sorted(data)}")
+        return row
+
+    # ------------------------------------------------------------------
+    # 示范条款模板库维护
+    # ------------------------------------------------------------------
+    @staticmethod
+    async def create_template(session: AsyncSession, payload) -> ClauseTemplate:
+        from datetime import datetime, timezone
+
+        tid = payload.template_id or f"T-{datetime.now(timezone.utc):%Y%m%d%H%M%S}"
+        exists = (
+            await session.execute(
+                select(ClauseTemplate).where(ClauseTemplate.template_id == tid)
+            )
+        ).scalar_one_or_none()
+        if exists is not None:
+            raise AppError(f"模板编号已存在：{tid}")
+
+        row = ClauseTemplate(id=str(uuid.uuid4()), template_id=tid)
+        RuleService._assign_template(row, payload)
+        session.add(row)
+        await session.flush()
+        logger.info(f"[模板] 新建 {tid}")
+        return row
+
+    @staticmethod
+    async def update_template(
+        session: AsyncSession, template_id: str, payload
+    ) -> ClauseTemplate:
+        row = (
+            await session.execute(
+                select(ClauseTemplate).where(ClauseTemplate.template_id == template_id)
+            )
+        ).scalar_one_or_none()
+        if row is None:
+            raise AppError(f"模板不存在：{template_id}")
+        RuleService._assign_template(row, payload)
+        await session.flush()
+        logger.info(f"[模板] 更新 {template_id}")
+        return row
+
+    @staticmethod
+    def _assign_template(row: ClauseTemplate, payload) -> None:
+        data = payload.model_dump()
+        data.pop("template_id", None)
+        row.title = data["title"]
+        row.clause_type = _as_value(data["clause_type"])
+        row.contract_types = data["contract_types"]
+        row.content = data["content"]
+        row.tags = data["tags"]
+        row.keywords = data["keywords"]
+        row.scenario = data["scenario"]
+        row.risk_level = _as_value(data["risk_level"])
+        row.legal_basis = data["legal_basis"]
+        row.version = data["version"]
+        row.enabled = data["enabled"]
+
+    # ------------------------------------------------------------------
+    # 序列化（出参统一走这里，避免路由里重复拼 dict）
+    # ------------------------------------------------------------------
+    @staticmethod
+    def rule_to_dict(r: ReviewRule) -> dict:
+        return {
+            "rule_id": r.rule_id,
+            "name": r.name,
+            "category": r.category,
+            "description": r.description,
+            "risk_level": r.risk_level,
+            "risk_level_label": RISK_LEVEL_LABEL.get(r.risk_level),
+            "trigger": r.trigger,
+            "checker": r.checker,
+            "params": r.params or {},
+            "patterns": r.patterns or [],
+            "exclude_patterns": r.exclude_patterns or [],
+            "contract_types": r.contract_types or [],
+            "contract_type_labels": [
+                CONTRACT_TYPE_LABEL.get(t, t) for t in (r.contract_types or [])
+            ],
+            "clause_types": r.clause_types or [],
+            "clause_type_labels": [
+                CLAUSE_TYPE_LABEL.get(t, t) for t in (r.clause_types or [])
+            ],
+            "reason": r.reason,
+            "legal_basis": r.legal_basis,
+            "suggestion_template": r.suggestion_template,
+            "tags": r.tags or [],
+            "enabled": r.enabled,
+            "priority": r.priority,
+        }
+
+    @staticmethod
+    def template_to_dict(t: ClauseTemplate) -> dict:
+        return {
+            "template_id": t.template_id,
+            "title": t.title,
+            "clause_type": t.clause_type,
+            "clause_type_label": CLAUSE_TYPE_LABEL.get(t.clause_type, t.clause_type),
+            "contract_types": t.contract_types or [],
+            "contract_type_labels": [
+                CONTRACT_TYPE_LABEL.get(c, c) for c in (t.contract_types or [])
+            ],
+            "content": t.content,
+            "tags": t.tags or [],
+            "keywords": t.keywords or [],
+            "scenario": t.scenario,
+            "risk_level": t.risk_level,
+            "risk_level_label": RISK_LEVEL_LABEL.get(t.risk_level),
+            "legal_basis": t.legal_basis,
+            "version": t.version,
+            "enabled": t.enabled,
+        }
 
     @staticmethod
     async def list_templates(
@@ -224,6 +370,11 @@ class RuleService:
 
 
 # ======================================================================
+def _as_value(v):
+    """枚举 → 字符串（DB 列存的是字符串）；其它类型原样返回。"""
+    return v.value if isinstance(v, Enum) else v
+
+
 def _rule_from_row(r: ReviewRule) -> ReviewRuleModel:
     return ReviewRuleModel(
         rule_id=r.rule_id,

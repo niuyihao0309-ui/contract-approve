@@ -55,3 +55,26 @@ class StateTransitionError(AppError):
 class WritebackError(AppError):
     code = "WRITEBACK_ERROR"
     http_status = 502
+
+
+# ----------------------------------------------------------------------
+# 认证与授权（2.4.2 角色权限的服务端落地）
+# ----------------------------------------------------------------------
+class UnauthorizedError(AppError):
+    """未登录 / 令牌无效。前端据此清登录态并跳登录页。"""
+
+    code = "UNAUTHORIZED"
+    http_status = 401
+
+
+class TokenExpiredError(UnauthorizedError):
+    """令牌过期。单独一个 code 是为了前端能提示「登录已过期」。"""
+
+    code = "TOKEN_EXPIRED"
+
+
+class ForbiddenError(AppError):
+    """已登录，但当前角色没有该权限点。"""
+
+    code = "FORBIDDEN"
+    http_status = 403

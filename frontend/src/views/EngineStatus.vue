@@ -1,16 +1,62 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { apiReview } from '../api'
+import { onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+import { apiApprovals, apiReview } from '../api'
+import { useAuthStore } from '../stores/auth'
+
+const auth = useAuthStore()
 
 const health = ref(null)
 const loading = ref(false)
+
+// 审批流对接参数（mock）—— 系统管理员职责
+const mock = reactive({ fail_rate: 0, latency: 0, timeout_at: 0 })
+const stats = ref(null)
+const busy = ref(false)
 
 async function load() {
   loading.value = true
   try {
     health.value = await apiReview.health()
+    stats.value = await apiApprovals.mockStats().catch(() => null)
   } finally {
     loading.value = false
+  }
+}
+
+async function saveMock() {
+  busy.value = true
+  try {
+    const r = await apiApprovals.mockConfig({
+      fail_rate: Number(mock.fail_rate) || 0,
+      latency: Number(mock.latency) || 0,
+      timeout_at: Number(mock.timeout_at) || 0,
+    })
+    ElMessage.success(r.message)
+    stats.value = await apiApprovals.mockStats().catch(() => null)
+  } finally {
+    busy.value = false
+  }
+}
+
+async function resetMock() {
+  await ElMessageBox.confirm('会清空模拟审批单与评论区数据，确定？', '重置模拟审批系统', {
+    type: 'warning',
+  })
+  const r = await apiApprovals.mockReset(true)
+  ElMessage.success(r.message)
+  await load()
+}
+
+async function pollOnce() {
+  busy.value = true
+  try {
+    const r = await apiApprovals.poll({ run_now: false, limit: 10 })
+    ElMessage.success(r.message)
+    stats.value = await apiApprovals.mockStats().catch(() => null)
+  } finally {
+    busy.value = false
   }
 }
 
@@ -73,6 +119,70 @@ onMounted(load)
           </el-card>
         </el-col>
       </el-row>
+
+      <!-- ================= 审批流对接配置（系统管理员） ================= -->
+      <el-card shadow="never" header="审批系统对接配置" class="mt-block">
+        <template #header>
+          <div class="card-head">
+            <span>审批系统对接配置</span>
+            <el-tag size="small" effect="plain">需管理员权限</el-tag>
+          </div>
+        </template>
+
+        <template v-if="auth.has('admin.approval')">
+          <el-alert type="info" :closable="false" show-icon class="mb">
+            <template #default>
+              这是本机模拟通道：<strong>失败率 / 延迟 / 超时</strong>用于复现
+              「接口异常 → 回写失败 → 重试成功」链路。真实对接时替换为实际网关地址、鉴权凭据与超时阈值。
+            </template>
+          </el-alert>
+
+          <el-row :gutter="16">
+            <el-col :span="12">
+              <div class="slider-row">
+                <span class="sl-label">接口失败率</span>
+                <el-slider v-model="mock.fail_rate" :min="0" :max="1" :step="0.05" show-input />
+              </div>
+              <div class="slider-row">
+                <span class="sl-label">接口延迟（秒）</span>
+                <el-slider v-model="mock.latency" :min="0" :max="10" :step="0.5" show-input />
+              </div>
+              <div class="slider-row">
+                <span class="sl-label">超时阈值（秒，0 = 不超时）</span>
+                <el-slider v-model="mock.timeout_at" :min="0" :max="10" :step="0.5" show-input />
+              </div>
+              <div class="btn-row">
+                <el-button type="primary" :loading="busy" @click="saveMock">保存对接参数</el-button>
+                <el-button :loading="busy" @click="pollOnce">立即拉取待办</el-button>
+                <el-button type="danger" plain @click="resetMock">重置模拟数据</el-button>
+              </div>
+            </el-col>
+
+            <el-col :span="12">
+              <div class="kv" v-if="stats">
+                <span>审批单总数</span><strong>{{ stats.tickets ?? stats.total ?? '—' }}</strong>
+              </div>
+              <div class="kv" v-if="stats">
+                <span>回写评论数</span><strong>{{ stats.comments ?? '—' }}</strong>
+              </div>
+              <div class="kv">
+                <span>当前模拟配置</span>
+                <strong class="mono">
+                  失败率 {{ (mock.fail_rate * 100).toFixed(0) }}% / 延迟 {{ mock.latency }}s /
+                  超时 {{ mock.timeout_at || '关' }}s
+                </strong>
+              </div>
+              <div class="kv">
+                <span>连通状态</span>
+                <el-tag size="small" type="success">模拟通道可用</el-tag>
+              </div>
+              <el-button link type="primary" @click="load">刷新统计</el-button>
+            </el-col>
+          </el-row>
+        </template>
+
+        <el-empty v-else description="审批流对接参数由系统管理员维护" :image-size="70" />
+      </el-card>
     </template>
   </div>
 </template>
@@ -119,5 +229,37 @@ onMounted(load)
   color: #98a1b3;
   font-size: 12px;
   margin-top: 8px;
+}
+.mt-block {
+  margin-top: 16px;
+}
+.mb {
+  margin-bottom: 14px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.sl-label {
+  width: 190px;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+.slider-row :deep(.el-slider) {
+  flex: 1;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
 }
 </style>

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
-from app.api.deps import SessionDep
+from app.api.deps import AuthDep, SessionDep, require_perm
 from app.core.exceptions import NotFoundError
 from app.models.enums import (
     CLAUSE_TYPE_LABEL,
@@ -16,7 +16,11 @@ from app.schemas.task import DecisionIn, OpResult
 from app.services.task_query import TaskQueryService
 from app.services.task_service import TaskService
 
-router = APIRouter(prefix="/tasks/{task_id}/risks", tags=["风险项"])
+router = APIRouter(
+    prefix="/tasks/{task_id}/risks",
+    tags=["风险项"],
+    dependencies=[Depends(require_perm("risk.view"))],
+)
 
 
 @router.get("", summary="风险清单（工作台卡片数据）")
@@ -58,24 +62,34 @@ async def get_risk(task_id: str, risk_id: str, session: SessionDep) -> dict:
     raise NotFoundError(f"风险项不存在：{risk_id}")
 
 
-@router.post("/{risk_id}/decision", summary="采纳 / 调整 / 驳回")
+@router.post(
+    "/{risk_id}/decision",
+    summary="采纳 / 调整 / 驳回",
+    dependencies=[Depends(require_perm("risk.decide"))],
+)
 async def decide(
-    task_id: str, risk_id: str, payload: DecisionIn, session: SessionDep
+    task_id: str, risk_id: str, payload: DecisionIn, session: SessionDep, ctx: AuthDep
 ) -> OpResult:
     """法务对风险项的处理。``edited_text`` 非空时会覆盖该风险的示范条款。
 
     这个路由和 ``POST /tasks/{id}/risks/{risk_id}/decision`` 等价，
     保留两份是为了前端调用路径更自然（都归到 risks 命名空间下）。
+    两处都挂 ``risk.decide`` —— 只有法务审查人有。
     """
-    return await _decide(task_id, risk_id, payload, session)
+    return await _decide(task_id, risk_id, payload, session, ctx=ctx)
 
 
-# 复用 tasks.py 的实现，避免两套逻辑
-async def _decide(task_id: str, risk_id: str, payload: DecisionIn, session) -> OpResult:
+# 与 tasks.py 的 decide_risk 同源逻辑
+async def _decide(
+    task_id: str, risk_id: str, payload: DecisionIn, session, *, ctx: AuthDep | None = None
+) -> OpResult:
     from sqlalchemy import select
 
     from app.core.exceptions import AppError
     from app.models.tables import ClauseSuggestion, RiskItem
+
+    actor = ctx.display_name if ctx and ctx.user else (payload.by or "法务审查人")
+    role = ctx.role if ctx and ctx.user else "lawyer"
 
     task = await TaskService.get(session, task_id)
     risk = await session.get(RiskItem, risk_id)
@@ -95,7 +109,7 @@ async def _decide(task_id: str, risk_id: str, payload: DecisionIn, session) -> O
         sug.decision = payload.decision
         if payload.edited_text is not None:
             sug.edited_text = payload.edited_text
-            sug.edited_by = payload.by
+            sug.edited_by = actor
 
     action = {
         ItemDecision.ACCEPTED.value: "采纳",
@@ -110,8 +124,8 @@ async def _decide(task_id: str, risk_id: str, payload: DecisionIn, session) -> O
         content=f"风险项「{risk.name}」处理结果：{action}"
         + (f"；法务说明：{payload.note}" if payload.note else "")
         + ("；已调整示范条款文本" if payload.edited_text else ""),
-        author=payload.by,
-        role="lawyer",
+        author=actor,
+        role=role,
         kind="decision",
         risk_item_id=risk.id,
         block_id=risk.block_id,

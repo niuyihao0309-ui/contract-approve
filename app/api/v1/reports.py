@@ -1,11 +1,16 @@
-"""报告导出接口（Markdown / PDF）。"""
+"""报告导出接口（Markdown / PDF）。
+
+``download`` 是浏览器直接导航打开的（``window.open``），带不了自定义请求头，
+所以它接受 ``?token=`` 查询参数 —— 具体理由见 ``app/api/deps.py`` 的
+``_extract_token``。
+"""
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import FileResponse, PlainTextResponse
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, require_perm
 from app.core.exceptions import AppError
 from app.services.report_service import (
     build_report_markdown,
@@ -23,21 +28,33 @@ _MIME = {
 }
 
 
-@router.get("", summary="预览审查报告（Markdown 文本）")
+@router.get(
+    "",
+    summary="预览审查报告（Markdown 文本）",
+    dependencies=[Depends(require_perm("report.view"))],
+)
 async def preview(task_id: str, session: SessionDep) -> PlainTextResponse:
     detail = await TaskQueryService.detail(session, task_id)
     md = build_report_markdown(detail, detail.get("risk_items", []))
     return PlainTextResponse(md, media_type="text/markdown; charset=utf-8")
 
 
-@router.get("/writeback-text", summary="预览回写用的意见文本")
+@router.get(
+    "/writeback-text",
+    summary="预览回写用的意见文本",
+    dependencies=[Depends(require_perm("report.view"))],
+)
 async def writeback_text(task_id: str, session: SessionDep) -> PlainTextResponse:
     detail = await TaskQueryService.detail(session, task_id)
     md = build_writeback_markdown(detail, detail.get("risk_items", []))
     return PlainTextResponse(md, media_type="text/markdown; charset=utf-8")
 
 
-@router.get("/download", summary="下载报告文件（fmt=md|pdf）")
+@router.get(
+    "/download",
+    summary="下载报告文件（fmt=md|pdf）",
+    dependencies=[Depends(require_perm("report.download"))],
+)
 async def download(
     task_id: str,
     session: SessionDep,
@@ -60,7 +77,7 @@ async def download(
     )
 
 
-@router.get("/files", summary="已生成的报告文件列表")
+@router.get("/files", summary="已生成的报告文件列表", dependencies=[Depends(require_perm("report.view"))])
 async def list_files(task_id: str, session: SessionDep) -> dict:
     from app.core.config import settings
 

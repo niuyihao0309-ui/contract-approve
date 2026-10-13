@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, Depends, Query
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, require_perm
 from app.core.config import settings
 from app.core.logging import logger
 from app.engines.review.checkers import CHECKERS
@@ -16,20 +16,34 @@ from app.services.task_service import TaskService
 router = APIRouter(prefix="/review", tags=["审查引擎"])
 
 
-@router.post("/tasks/{task_id}/run", response_model=OpResult, summary="跑完整流水线")
+@router.post(
+    "/tasks/{task_id}/run",
+    response_model=OpResult,
+    summary="跑完整流水线",
+    dependencies=[Depends(require_perm("task.monitor"))],
+)
 async def run(task_id: str, session: SessionDep) -> OpResult:
     summary = await PipelineRunner.run(task_id)
     return OpResult(ok=bool(summary.get("ok")), message="流水线执行完成", data=summary)
 
 
-@router.post("/tasks/{task_id}/reparse", response_model=OpResult, summary="强制重新解析")
+@router.post(
+    "/tasks/{task_id}/reparse",
+    response_model=OpResult,
+    summary="强制重新解析",
+    dependencies=[Depends(require_perm("task.retry"))],
+)
 async def reparse(task_id: str, session: SessionDep) -> OpResult:
     """忽略已有落库结果，从附件重新解析一遍（换了解析器或怀疑解析有误时用）。"""
     summary = await PipelineRunner.run(task_id, force_reparse=True)
     return OpResult(ok=bool(summary.get("ok")), message="已重新解析并审查", data=summary)
 
 
-@router.get("/tasks/{task_id}/summary", summary="审查摘要与结论")
+@router.get(
+    "/tasks/{task_id}/summary",
+    summary="审查摘要与结论",
+    dependencies=[Depends(require_perm("task.view"))],
+)
 async def summary(task_id: str, session: SessionDep) -> dict:
     task = await TaskService.get(session, task_id)
     from app.models.enums import (
@@ -63,7 +77,7 @@ async def summary(task_id: str, session: SessionDep) -> dict:
     }
 
 
-@router.get("/health", summary="审查引擎自检")
+@router.get("/health", summary="审查引擎自检", dependencies=[Depends(require_perm("engine.view"))])
 async def engine_health() -> dict:
     """看一眼引擎装了哪些能力：规则条数、模板条数、LLM 与 OCR 是否可用。"""
     from app.services.rule_service import RuleService
@@ -97,12 +111,16 @@ async def engine_health() -> dict:
     }
 
 
-@router.get("/llm/health", summary="LLM 连通性自检")
+@router.get("/llm/health", summary="LLM 连通性自检", dependencies=[Depends(require_perm("engine.view"))])
 async def llm_health() -> dict:
     return await get_llm().health_check()
 
 
-@router.post("/llm/test", summary="用一段合同片段试跑语义研判")
+@router.post(
+    "/llm/test",
+    summary="用一段合同片段试跑语义研判",
+    dependencies=[Depends(require_perm("engine.view"))],
+)
 async def llm_test(
     session: SessionDep,
     text: str = Body(..., embed=True, description="要研判的合同片段"),

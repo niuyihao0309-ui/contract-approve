@@ -72,6 +72,11 @@ class TaskQueryService:
         base["clauses"] = await TaskQueryService._clauses(session, task_id)
         base["comments"] = await TaskQueryService._comments(session, task_id)
         base["writeback"] = await TaskQueryService._writeback(session, task_id)
+        # 上传批次上下文（一次提交多份文件时才有，单文件 / 历史数据为 None）：
+        # 前端据此渲染左侧「文件切换条」，点哪个文件就切哪份的原文与风险清单
+        from app.services.batch_service import BatchService
+
+        base["batch"] = await BatchService.context(session, task_id)
         base["stats"] = {
             "risk_by_level": task.risk_counts or {"high": 0, "medium": 0, "low": 0},
             "block_count": len(base["doc"]["blocks"]) if base["doc"] else 0,

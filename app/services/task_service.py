@@ -111,6 +111,24 @@ class TaskService:
             raise NotFoundError(f"任务不存在：{task_id}")
         return task
 
+    @staticmethod
+    async def delete(session: AsyncSession, task_id: str) -> ContractTask:
+        """删除任务（关联行由外键 ``ON DELETE CASCADE`` 带走）。
+
+        抽成统一入口的理由：批量删除那条路径曾经**漏了 commit** ——
+        ``session.delete()`` 之后直接 ``continue``，跳过了循环尾部的 ``await session.commit()``，
+        于是接口回报「批量删除：成功 N 条」而数据一条没少（假成功，前端还提示成功）。
+        删除逻辑收到这一处，调用方只需 ``await session.commit()``，就不会再漏。
+
+        注意：本方法**不自己开事务**（与其它方法一致），只 flush。
+        """
+        task = await TaskService.get(session, task_id)
+        title = task.title
+        await session.delete(task)
+        await session.flush()
+        logger.info(f"[任务 {task_id[:8]}] 已删除：{title}")
+        return task
+
     # ------------------------------------------------------------------
     # 状态流转（唯一入口）
     # ------------------------------------------------------------------
@@ -351,6 +369,9 @@ class TaskService:
         risk: str | None = None,
         business_type: str | None = None,
         keyword: str | None = None,
+        applicant: str | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
         approval_ticket_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
@@ -366,6 +387,12 @@ class TaskService:
             conditions.append(ContractTask.overall_risk == risk)
         if business_type:
             conditions.append(ContractTask.business_type == business_type)
+        if applicant:
+            conditions.append(ContractTask.applicant.like(f"%{applicant}%"))
+        if date_from is not None:
+            conditions.append(ContractTask.created_at >= date_from)
+        if date_to is not None:
+            conditions.append(ContractTask.created_at <= date_to)
         if approval_ticket_id:
             conditions.append(ContractTask.approval_ticket_id == approval_ticket_id)
         if keyword:
@@ -374,6 +401,8 @@ class TaskService:
                 ContractTask.title.like(like)
                 | ContractTask.contract_no.like(like)
                 | ContractTask.counterparty.like(like)
+                | ContractTask.applicant.like(like)
+                | ContractTask.department.like(like)
             )
 
         for c in conditions:
