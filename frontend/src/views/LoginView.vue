@@ -23,7 +23,6 @@ const accounts = ref([])
 const showPwd = ref(false)
 
 async function loadMeta() {
-  // 公开接口，拿不到也不影响登录 —— 静默失败即可
   try {
     accounts.value = await apiAuth.demoAccounts()
   } catch (e) {
@@ -60,74 +59,72 @@ async function submit() {
 
 onMounted(() => {
   loadMeta()
-  // 从「角色与权限」页跳过来时会带上要用的账号
   if (typeof route.query.username === 'string') form.username = route.query.username
 })
 </script>
 
 <template>
   <div class="login-page">
-    <!-- 左：品牌 -->
-    <div class="hero">
-      <div class="hero-inner">
-        <div class="hero-mark">合</div>
-        <div class="hero-title">合同审查</div>
-        <p class="hero-line">合同解析 · 风险识别 · 意见回写</p>
+    <div class="card">
+      <!-- 品牌头 -->
+      <div class="brand">
+        <div class="brand-logo">合</div>
+        <div class="brand-text">
+          <div class="brand-title">合同审查</div>
+          <div class="brand-line">合同解析 · 风险识别 · 意见回写</div>
+        </div>
       </div>
-    </div>
 
-    <!-- 右：登录表单 -->
-    <div class="form-side">
-      <div class="form-inner">
-        <h1 class="form-title">登录</h1>
-        <p class="form-sub">请使用系统账号登录；不同角色的菜单与可执行操作不同。</p>
+      <h1 class="form-title">登录</h1>
+      <p class="form-sub">请使用系统账号登录</p>
 
-        <el-form :model="form" label-position="top" @submit.prevent="submit">
-          <el-form-item label="账号">
-            <el-input
-              v-model="form.username"
-              size="large"
-              placeholder="请输入账号"
-              clearable
-              autocomplete="username"
-              @keyup.enter="submit"
-            >
-              <template #prefix><el-icon><User /></el-icon></template>
-            </el-input>
-          </el-form-item>
-
-          <el-form-item label="密码">
-            <el-input
-              v-model="form.password"
-              size="large"
-              :type="showPwd ? 'text' : 'password'"
-              placeholder="请输入密码"
-              autocomplete="current-password"
-              @keyup.enter="submit"
-            >
-              <template #prefix><el-icon><Lock /></el-icon></template>
-              <template #suffix>
-                <el-icon class="pwd-eye" @click="showPwd = !showPwd">
-                  <component :is="showPwd ? 'View' : 'Hide'" />
-                </el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
-
-          <el-button
-            type="primary"
+      <el-form :model="form" label-position="top" @submit.prevent="submit">
+        <el-form-item label="账号">
+          <el-input
+            v-model="form.username"
             size="large"
-            class="submit"
-            :loading="loading"
-            @click="submit"
+            placeholder="请输入账号"
+            clearable
+            autocomplete="username"
+            @keyup.enter="submit"
           >
-            {{ loading ? '正在登录…' : '登 录' }}
-          </el-button>
-        </el-form>
+            <template #prefix><el-icon><User /></el-icon></template>
+          </el-input>
+        </el-form-item>
 
-        <!-- 快捷登录：点击任意一行自动填充 -->
-        <div v-if="accounts.length" class="demo">
-          <div class="demo-head">快捷登录</div>
+        <el-form-item label="密码">
+          <el-input
+            v-model="form.password"
+            size="large"
+            :type="showPwd ? 'text' : 'password'"
+            placeholder="请输入密码"
+            autocomplete="current-password"
+            @keyup.enter="submit"
+          >
+            <template #prefix><el-icon><Lock /></el-icon></template>
+            <template #suffix>
+              <el-icon class="pwd-eye" @click="showPwd = !showPwd">
+                <component :is="showPwd ? 'View' : 'Hide'" />
+              </el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-button
+          type="primary"
+          size="large"
+          class="submit"
+          :loading="loading"
+          @click="submit"
+        >
+          {{ loading ? '正在登录…' : '登 录' }}
+        </el-button>
+      </el-form>
+
+      <!-- 快捷登录 -->
+      <div v-if="accounts.length" class="demo">
+        <div class="demo-head">快捷登录</div>
+        <div class="demo-list">
           <div
             v-for="a in accounts"
             :key="a.username"
@@ -147,61 +144,56 @@ onMounted(() => {
 
 <style scoped>
 .login-page {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   min-height: 100vh;
-}
-/* ---- 左侧品牌区（极简：一块底色 + 名称 + 一行说明） ---- */
-.hero {
-  background: #1f2937;
-  color: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px;
+  padding: 40px 20px;
+  background: var(--bg-page);
 }
-.hero-inner {
-  max-width: 340px;
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px 32px 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
-.hero-mark {
-  width: 40px;
-  height: 40px;
+/* ---- 品牌头 ---- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.brand-logo {
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: var(--el-color-primary);
   color: #fff;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.35);
+  flex-shrink: 0;
 }
-.hero-title {
-  margin: 18px 0 0;
-  font-size: 22px;
+.brand-title {
+  font-size: 16px;
   font-weight: 600;
-  color: #fff;
-  letter-spacing: 1px;
-}
-.hero-line {
-  margin: 10px 0 0;
-  font-size: 13px;
-  color: #98a3b3;
+  color: var(--ink-1);
   letter-spacing: 0.5px;
 }
-/* ---- 右侧表单 ---- */
-.form-side {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 32px;
-  background: var(--surface);
-  overflow: auto;
+.brand-line {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  letter-spacing: 0.3px;
 }
-.form-inner {
-  width: 100%;
-  max-width: 372px;
-}
+/* ---- 表单 ---- */
 .form-title {
   margin: 0 0 6px;
   font-size: 20px;
@@ -225,8 +217,8 @@ onMounted(() => {
 }
 /* ---- 快捷登录 ---- */
 .demo {
-  margin-top: 28px;
-  border-top: 1px solid var(--line-soft);
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
   padding-top: 14px;
 }
 .demo-head {
@@ -234,23 +226,30 @@ onMounted(() => {
   color: var(--ink-3);
   margin-bottom: 8px;
 }
+.demo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .demo-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
+  padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 12px;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
+  background: var(--bg-hover);
 }
 .demo-item:hover {
-  background: var(--canvas);
+  background: var(--bg-active);
+  border-color: var(--line);
 }
 .demo-item.active {
   background: var(--el-color-primary-light-9);
-  border-color: var(--el-color-primary-light-7);
+  border-color: var(--el-color-primary);
 }
 .di-name {
   font-size: 13px;
@@ -264,13 +263,5 @@ onMounted(() => {
   margin-left: auto;
   color: var(--ink-3);
   font-family: Consolas, Monaco, monospace;
-}
-@media (max-width: 900px) {
-  .login-page {
-    grid-template-columns: 1fr;
-  }
-  .hero {
-    display: none;
-  }
 }
 </style>
