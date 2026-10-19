@@ -58,7 +58,7 @@ const activeMenu = computed(() => {
   height: 100%;
 }
 .aside {
-  background: var(--surface);
+  background: var(--bg-panel);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -69,7 +69,7 @@ const activeMenu = computed(() => {
   gap: 9px;
   height: 56px;
   padding: 0 18px;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line);
 }
 .brand-logo {
   width: 26px;
@@ -83,6 +83,7 @@ const activeMenu = computed(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
 }
 .brand-title {
   font-size: 15px;
@@ -97,8 +98,8 @@ const activeMenu = computed(() => {
   padding: 8px 0;
   --el-menu-bg-color: transparent;
   --el-menu-text-color: var(--ink-2);
-  --el-menu-hover-bg-color: var(--canvas);
-  --el-menu-active-color: var(--el-color-primary);
+  --el-menu-hover-bg-color: var(--bg-hover);
+  --el-menu-active-color: #fff;
   --el-menu-item-height: 42px;
 }
 .menu :deep(.el-menu-item) {
@@ -107,12 +108,13 @@ const activeMenu = computed(() => {
   font-size: 13px;
 }
 .menu :deep(.el-menu-item.is-active) {
-  background: var(--el-color-primary-light-9);
+  background: var(--el-color-primary);
   font-weight: 600;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
 }
 .role-foot {
   padding: 12px 18px 16px;
-  border-top: 1px solid var(--line-soft);
+  border-top: 1px solid var(--line);
 }
 .role-line {
   font-size: 12px;
@@ -127,6 +129,7 @@ const activeMenu = computed(() => {
 .main {
   padding: 0 20px 20px;
   overflow: auto;
+  background: var(--bg-page);
 }
 .topbar {
   position: sticky;
@@ -137,7 +140,7 @@ const activeMenu = computed(() => {
   align-items: center;
   padding: 10px 0;
   margin-bottom: 8px;
-  background: var(--canvas);
-  border-bottom: 1px solid var(--line-soft);
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--line);
 }
 </style>

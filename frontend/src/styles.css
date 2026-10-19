@@ -1,44 +1,69 @@
 /* ======================================================================
-   全局样式：商务简约
-   - 收敛色板：白底 / 细描边 / 单一克制主色，去掉渐变与重投影
-   - ⚠️ 风险等级色（--risk-high/medium/low）与 mark.hl-* / .doc-block /
-     .perm-denied 等功能类名保持不变 —— 它们是业务语义与验收脚本的依赖
+   全局样式：深色高级风
+   - 页面底 #0b0d10，卡片底 #161a21，侧栏 #111318
+   - 文字反白，描边极淡，投影极轻（暗色下投影存在感极低）
+   - 风险等级色与 mark.hl-* 保持高饱和，在暗色下更醒目
    ====================================================================== */
 
 :root {
-  /* ---- 业务语义色（勿改） ---- */
-  --risk-high: #e5484d;
-  --risk-medium: #f5a524;
-  --risk-low: #8b8d98;
+  /* ---- 业务语义色（暗色下保持高饱和） ---- */
+  --risk-high: #ef4444;
+  --risk-medium: #f59e0b;
+  --risk-low: #9ca3af;
 
-  /* ---- 商务简约设计令牌 ---- */
-  --ink-1: #1f2329; /* 主文字 */
-  --ink-2: #4b5563; /* 次级文字 */
-  --ink-3: #8b93a1; /* 弱化文字 */
-  --line: #e8eaed; /* 主描边 */
-  --line-soft: #f0f2f5; /* 次级分隔线 */
-  --surface: #ffffff; /* 卡片底 */
-  --canvas: #f6f7f9; /* 页面底 */
-  --radius: 8px;
-  --radius-sm: 6px;
+  /* ---- 深色设计令牌 ---- */
+  --bg-page: #0b0d10;
+  --bg-panel: #111318;
+  --bg-card: #161a21;
+  --bg-hover: #1c212b;
+  --bg-active: #1e2532;
 
-  /* ---- Element Plus 主色收敛（覆盖默认 #409eff 系） ---- */
-  --el-color-primary: #2563eb;
-  --el-color-primary-light-3: #5b86ea;
-  --el-color-primary-light-5: #8fabf0;
-  --el-color-primary-light-7: #c3d1f6;
-  --el-color-primary-light-8: #d9e1f9;
-  --el-color-primary-light-9: #eef2fd;
-  --el-color-primary-dark-2: #1d4ed8;
+  --ink-1: #f1f5f9;
+  --ink-2: #94a3b8;
+  --ink-3: #64748b;
+  --ink-4: #475569;
 
-  --el-border-radius-base: 6px;
-  --el-text-color-primary: var(--ink-1);
-  --el-text-color-regular: var(--ink-2);
-  --el-border-color: var(--line);
-  --el-border-color-light: var(--line);
-  --el-border-color-lighter: var(--line-soft);
-  --el-fill-color-blank: var(--surface);
-  --el-box-shadow-light: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --line: #232830;
+  --line-soft: #1a1e26;
+
+  --radius: 10px;
+  --radius-sm: 8px;
+
+  /* ---- Element Plus 暗色覆盖 ---- */
+  --el-color-primary: #3b82f6;
+  --el-color-primary-light-3: #60a5fa;
+  --el-color-primary-light-5: #93c5fd;
+  --el-color-primary-light-7: #bfdbfe;
+  --el-color-primary-light-8: #dbeafe;
+  --el-color-primary-light-9: rgba(59, 130, 246, 0.12);
+  --el-color-primary-dark-2: #2563eb;
+
+  --el-color-white: #161a21;
+  --el-color-black: #f1f5f9;
+  --el-bg-color: #161a21;
+  --el-bg-color-page: #0b0d10;
+  --el-bg-color-overlay: #1a1e26;
+  --el-text-color-primary: #f1f5f9;
+  --el-text-color-regular: #94a3b8;
+  --el-text-color-secondary: #64748b;
+  --el-text-color-placeholder: #475569;
+  --el-text-color-disabled: #475569;
+  --el-border-color: #232830;
+  --el-border-color-light: #232830;
+  --el-border-color-lighter: #1a1e26;
+  --el-border-color-extra-light: #111318;
+  --el-fill-color: #1c212b;
+  --el-fill-color-light: #1e2532;
+  --el-fill-color-lighter: #232830;
+  --el-fill-color-extra-light: #2a2e35;
+  --el-fill-color-blank: #161a21;
+  --el-fill-color-dark: #0b0d10;
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+  --el-mask-color-extra-light: rgba(0, 0, 0, 0.3);
+  --el-box-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --el-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+
+  --el-border-radius-base: 8px;
 }
 
 * {
@@ -52,14 +77,15 @@ body,
   padding: 0;
   height: 100%;
   font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-  background: var(--canvas);
+  background: var(--bg-page);
   color: var(--ink-1);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 卡片：统一的细描边 + 极轻投影，不抢视线 */
+/* 卡片：暗色底 + 极淡描边 */
 .el-card {
+  background: var(--bg-card);
   border-color: var(--line);
   border-radius: var(--radius);
 }
@@ -85,10 +111,10 @@ body,
 }
 
 /* ---------------------------------------------------------------- */
-/* 原文高亮 mark（叠层实现，勿改结构）                              */
+/* 原文高亮 mark（暗色下背景加深，保持醒目）                        */
 /* ---------------------------------------------------------------- */
 mark.hl-high {
-  background: rgba(229, 72, 77, 0.16);
+  background: rgba(239, 68, 68, 0.22);
   border-bottom: 2px solid var(--risk-high);
   color: inherit;
   padding: 0 1px;
@@ -96,7 +122,7 @@ mark.hl-high {
   cursor: pointer;
 }
 mark.hl-medium {
-  background: rgba(245, 165, 36, 0.16);
+  background: rgba(245, 158, 11, 0.22);
   border-bottom: 2px solid var(--risk-medium);
   color: inherit;
   padding: 0 1px;
@@ -104,7 +130,7 @@ mark.hl-medium {
   cursor: pointer;
 }
 mark.hl-low {
-  background: rgba(139, 141, 152, 0.14);
+  background: rgba(156, 163, 175, 0.18);
   border-bottom: 2px solid var(--risk-low);
   color: inherit;
   padding: 0 1px;
@@ -132,13 +158,14 @@ mark.hl-active {
   font-weight: 600;
   font-size: 16px;
   margin-top: 8px;
+  color: var(--ink-1);
 }
 .doc-block.is-flash {
-  background: #fff8e2;
+  background: rgba(245, 158, 11, 0.12);
   border-left-color: var(--risk-medium);
 }
 
-/* 分页分隔：只留一行淡字，去掉装饰线 */
+/* 分页分隔 */
 .page-sep {
   margin: 14px 0;
   text-align: center;
@@ -147,20 +174,19 @@ mark.hl-active {
   letter-spacing: 0.5px;
 }
 
-/* 文本层高亮容器：内层滚动，免得长合同把整页撑开
-   （组件里 inline 设了 maxHeight，但没有 overflow 就不会滚） */
+/* 文本层高亮容器 */
 .highlight-doc {
   max-height: 72vh;
   overflow: auto;
-  background: var(--surface);
+  background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 10px 6px;
 }
 
-/* 无权限的入口：保留位置但视觉上「用不了」，鼠标提示缺哪个权限 */
+/* 无权限 */
 .perm-denied {
-  opacity: 0.5 !important;
+  opacity: 0.4 !important;
   cursor: not-allowed !important;
   filter: grayscale(0.6);
 }
@@ -168,7 +194,7 @@ mark.hl-active {
   pointer-events: none !important;
 }
 
-/* 表格里的弱化文本 */
+/* 表格弱化文本 */
 .ellipsis {
   display: inline-block;
   max-width: 100%;
