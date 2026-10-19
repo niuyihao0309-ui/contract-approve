@@ -271,7 +271,7 @@ onMounted(loadAccounts)
 }
 .sub {
   margin: 0;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 13px;
   line-height: 1.7;
   max-width: 900px;
@@ -282,7 +282,7 @@ onMounted(loadAccounts)
   gap: 14px;
 }
 .role-card {
-  background: var(--surface);
+  background: var(--bg-card);
   border: 1px solid var(--line);
   border-top: 2px solid var(--role-color);
   border-radius: var(--radius);
@@ -305,12 +305,12 @@ onMounted(loadAccounts)
 .rc-meta {
   margin-top: 4px;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .rc-duty {
   margin-top: 10px;
   font-size: 13px;
-  color: #4b5563;
+  color: var(--ink-2);
   line-height: 1.7;
 }
 .rc-block {
@@ -318,14 +318,14 @@ onMounted(loadAccounts)
 }
 .rc-block-title {
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
   margin-bottom: 6px;
 }
 .duty-list {
   margin: 0;
   padding-left: 16px;
   font-size: 12px;
-  color: #374151;
+  color: var(--ink-2);
 }
 .duty-list li {
   margin-bottom: 6px;
@@ -360,7 +360,7 @@ onMounted(loadAccounts)
   font-weight: 600;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   font-weight: 400;
 }
@@ -380,13 +380,13 @@ onMounted(loadAccounts)
 }
 .matrix th,
 .matrix td {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--line);
   padding: 6px 10px;
   text-align: left;
 }
 .matrix thead th {
-  background: #f8fafc;
-  color: #6b7280;
+  background: var(--bg-hover);
+  color: var(--ink-3);
   font-weight: 600;
 }
 .col-perm {

@@ -208,11 +208,11 @@ onMounted(load)
   font-size: 14px;
 }
 .kv span {
-  color: #6b7280;
+  color: var(--ink-3);
 }
 .kv-title {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ink-3);
   margin: 12px 0 8px;
 }
 .checker-tag {
@@ -226,7 +226,7 @@ onMounted(load)
   font-size: 12px;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   margin-top: 8px;
 }
@@ -251,7 +251,7 @@ onMounted(load)
   width: 190px;
   flex-shrink: 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--ink-3);
 }
 .slider-row :deep(.el-slider) {
   flex: 1;

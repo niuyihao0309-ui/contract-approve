@@ -257,14 +257,14 @@ function onScroll() {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 6px 10px;
 }
 .tb-label {
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .spacer {
   flex: 1;

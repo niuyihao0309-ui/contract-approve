@@ -63,7 +63,7 @@ async function relogin(username) {
 .code {
   font-size: 72px;
   font-weight: 800;
-  color: #dcdfe6;
+  color: var(--ink-3);
   line-height: 1;
 }
 .title {
@@ -71,12 +71,12 @@ async function relogin(username) {
   font-size: 20px;
 }
 .desc {
-  color: #4b5563;
+  color: var(--ink-2);
   line-height: 1.8;
 }
 .mono {
   font-family: Consolas, Monaco, monospace;
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .from {
@@ -91,7 +91,7 @@ async function relogin(username) {
 }
 .hint {
   margin-top: 28px;
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 </style>

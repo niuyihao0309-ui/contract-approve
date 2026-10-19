@@ -608,7 +608,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: var(--surface);
+  background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 14px 18px;
@@ -659,8 +659,8 @@ onMounted(() => {
   transition: background 0.15s, border-color 0.15s;
 }
 .ws-item:hover {
-  background: var(--canvas);
-  border-color: var(--el-color-primary-light-7);
+  background: var(--bg-hover);
+  border-color: var(--el-color-primary);
 }
 .ws-num {
   font-size: 20px;
@@ -685,15 +685,15 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  color: #b91c1c;
+  color: var(--risk-high);
   margin-bottom: 6px;
 }
 .bp-body {
-  color: #4b5563;
+  color: var(--ink-2);
   line-height: 1.8;
   max-height: 200px;
   overflow: auto;
-  background: #fafbfc;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 8px 10px;
 }
@@ -706,7 +706,7 @@ onMounted(() => {
 }
 .bp-retry {
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .page-head {
   display: flex;
@@ -736,7 +736,7 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 .stat-card {
-  background: var(--surface);
+  background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 14px 12px;
@@ -808,7 +808,7 @@ onMounted(() => {
   margin-top: 12px;
 }
 .muted {
-  color: #c0c4cc;
+  color: var(--ink-3);
 }
 .nowrap {
   white-space: nowrap;

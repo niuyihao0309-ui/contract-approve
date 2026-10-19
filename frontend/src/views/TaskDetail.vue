@@ -465,7 +465,7 @@ onMounted(load)
 }
 .sub-line {
   margin-top: 6px;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 13px;
   display: flex;
   gap: 16px;
@@ -514,7 +514,7 @@ onMounted(load)
   flex: 1;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 
@@ -525,7 +525,7 @@ onMounted(load)
   overflow-x: auto;
   padding-bottom: 8px;
   margin-bottom: 8px;
-  border-bottom: 1px dashed #e5e7eb;
+  border-bottom: 1px dashed var(--line);
 }
 .batch-chip {
   display: flex;
@@ -534,9 +534,9 @@ onMounted(load)
   flex: 0 0 auto;
   max-width: 240px;
   padding: 5px 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #f8fafc;
+  background: var(--bg-hover);
   cursor: pointer;
   font-size: 12px;
   transition: all 0.15s;
@@ -550,7 +550,7 @@ onMounted(load)
   font-weight: 600;
 }
 .chip-seq {
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .chip-name {
   overflow: hidden;
@@ -585,7 +585,7 @@ onMounted(load)
 /* 概览 */
 .meta-table {
   margin-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--line);
 }
 .meta-title {
   font-size: 13px;
@@ -601,15 +601,15 @@ onMounted(load)
 }
 .meta-key {
   width: 150px;
-  color: #6b7280;
+  color: var(--ink-3);
   flex-shrink: 0;
 }
 .meta-val {
   flex: 1;
-  color: #1f2329;
+  color: var(--ink-1);
 }
 .meta-loc {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .conclusion-big {
@@ -621,15 +621,15 @@ onMounted(load)
 }
 .risk-badge .sep {
   margin: 0 8px;
-  color: #c0c4cc;
+  color: var(--ink-3);
 }
 .summary-text {
-  color: #4b5563;
+  color: var(--ink-2);
   line-height: 1.7;
 }
 .focus-box {
   margin-top: 16px;
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 8px;
   padding: 12px 16px;
 }
@@ -640,7 +640,7 @@ onMounted(load)
 .focus-box ol {
   margin: 0;
   padding-left: 20px;
-  color: #4b5563;
+  color: var(--ink-2);
 }
 .focus-box li {
   margin: 4px 0;
@@ -660,7 +660,7 @@ onMounted(load)
 .parse-error {
   margin-top: 8px;
   font-size: 12px;
-  color: #b91c1c;
+  color: var(--risk-high);
   word-break: break-all;
 }
 .comment-author {
@@ -671,6 +671,6 @@ onMounted(load)
   margin-right: 8px;
 }
 .comment-content {
-  color: #4b5563;
+  color: var(--ink-2);
 }
 </style>

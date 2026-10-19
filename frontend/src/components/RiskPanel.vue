@@ -414,7 +414,7 @@ function onLocate(r) {
   color: var(--risk-low);
 }
 .cnt.open {
-  color: #6b7280;
+  color: var(--ink-3);
 }
 .kw {
   flex-shrink: 0;
@@ -454,7 +454,7 @@ function onLocate(r) {
   font-size: 14px;
 }
 .src {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .spacer {
@@ -465,26 +465,26 @@ function onLocate(r) {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .quote {
   margin-top: 8px;
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 8px 12px;
-  color: #4b5563;
+  color: var(--ink-2);
   font-size: 13px;
 }
 .reason {
   margin-top: 8px;
-  color: #374151;
+  color: var(--ink-2);
   line-height: 1.7;
   font-size: 13px;
 }
 .basis {
   margin-top: 6px;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 12px;
   display: flex;
   gap: 4px;
@@ -492,7 +492,7 @@ function onLocate(r) {
 }
 .sug {
   margin-top: 10px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--line);
   padding-top: 10px;
 }
 .sug-head {
@@ -506,15 +506,15 @@ function onLocate(r) {
 }
 .sim {
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .col-label {
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
   margin: 8px 0 4px;
 }
 .del-label {
-  color: #b91c1c;
+  color: var(--risk-high);
 }
 .add-label {
   color: #15803d;
@@ -529,45 +529,45 @@ function onLocate(r) {
   padding: 8px 12px;
 }
 .pre.del {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.12);
   border: 1px solid #fecaca;
   color: #7f1d1d;
 }
 .pre.add {
-  background: #f0fdf4;
+  background: rgba(34, 197, 94, 0.12);
   border: 1px solid #bbf7d0;
   color: #166534;
 }
 .diff-pre {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
   max-height: 260px;
   overflow: auto;
 }
 .del-text {
-  color: #b91c1c;
+  color: var(--risk-high);
 }
 .add-text {
   color: #15803d;
 }
 .d-del {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--risk-high);
   display: block;
 }
 .d-add {
-  background: #f0fdf4;
+  background: rgba(34, 197, 94, 0.12);
   color: #15803d;
   display: block;
 }
 .d-same {
-  color: #6b7280;
+  color: var(--ink-3);
   display: block;
 }
 .decide {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--line);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -580,13 +580,13 @@ function onLocate(r) {
 .editor-tip {
   margin-top: 4px;
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .readonly {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 </style>

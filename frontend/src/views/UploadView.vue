@@ -985,17 +985,17 @@ onBeforeUnmount(() => {
 }
 .sub {
   margin: 0;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 13px;
   line-height: 1.7;
 }
 .up-icon {
   font-size: 46px;
-  color: #c0c4cc;
+  color: var(--ink-3);
   margin-top: 22px;
 }
 .up-text {
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 13px;
   margin: 8px 0 22px;
 }
@@ -1004,7 +1004,7 @@ onBeforeUnmount(() => {
   font-style: normal;
 }
 .up-tip {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   margin-top: 6px;
   text-align: center;
@@ -1021,7 +1021,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--ink-3);
   margin-bottom: 6px;
 }
 .picked-head .over {
@@ -1031,8 +1031,8 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-hover);
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 13px;
@@ -1045,7 +1045,7 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 .picked-size {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .mt {
@@ -1095,7 +1095,7 @@ onBeforeUnmount(() => {
   gap: 5px;
   margin-top: 6px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--ink-3);
   line-height: 1.6;
 }
 .up-progress-text .is-loading {
@@ -1114,7 +1114,7 @@ onBeforeUnmount(() => {
   margin-bottom: 10px;
 }
 .task-id {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   flex: 1;
 }
@@ -1124,7 +1124,7 @@ onBeforeUnmount(() => {
 .stage {
   margin-top: 8px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--ink-3);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1139,12 +1139,12 @@ onBeforeUnmount(() => {
 /* ---------- 批次清单（右侧卡片内） ---------- */
 .brief-list {
   margin-top: 12px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--line);
   padding-top: 10px;
 }
 .brief-title {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--ink-3);
   margin-bottom: 6px;
   display: flex;
   gap: 8px;
@@ -1166,7 +1166,7 @@ onBeforeUnmount(() => {
   background: var(--el-color-primary-light-9);
 }
 .brief-idx {
-  color: #98a1b3;
+  color: var(--ink-3);
   width: 14px;
   text-align: right;
 }
@@ -1191,7 +1191,7 @@ onBeforeUnmount(() => {
 
 .result {
   margin-top: 14px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--line);
   padding-top: 12px;
 }
 .result-row {
@@ -1202,7 +1202,7 @@ onBeforeUnmount(() => {
   font-size: 13px;
 }
 .k {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   width: 56px;
 }
@@ -1221,11 +1221,11 @@ onBeforeUnmount(() => {
   color: var(--risk-low);
 }
 .summary {
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 6px;
   padding: 10px 12px;
   font-size: 13px;
-  color: #4b5563;
+  color: var(--ink-2);
   line-height: 1.8;
   margin-bottom: 10px;
 }
@@ -1256,7 +1256,7 @@ onBeforeUnmount(() => {
   flex: 1;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 
@@ -1267,7 +1267,7 @@ onBeforeUnmount(() => {
   overflow-x: auto;
   padding-bottom: 8px;
   margin-bottom: 8px;
-  border-bottom: 1px dashed #e5e7eb;
+  border-bottom: 1px dashed var(--line);
 }
 .batch-chip {
   display: flex;
@@ -1276,9 +1276,9 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   max-width: 240px;
   padding: 5px 10px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #f8fafc;
+  background: var(--bg-hover);
   cursor: pointer;
   font-size: 12px;
   transition: all 0.15s;
@@ -1292,7 +1292,7 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 .chip-seq {
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .chip-name {
   overflow: hidden;
@@ -1372,7 +1372,7 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 .rk-src {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .rk-loc {
@@ -1380,16 +1380,16 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .rk-quote {
   margin-top: 8px;
   border-left: 3px solid var(--risk-low);
-  background: #f8fafc;
+  background: var(--bg-hover);
   border-radius: 0 6px 6px 0;
   padding: 8px 12px;
-  color: #4b5563;
+  color: var(--ink-2);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -1403,13 +1403,13 @@ onBeforeUnmount(() => {
 }
 .rk-reason {
   margin-top: 8px;
-  color: #374151;
+  color: var(--ink-2);
   line-height: 1.7;
   font-size: 13px;
 }
 .rk-basis {
   margin-top: 6px;
-  color: #6b7280;
+  color: var(--ink-3);
   font-size: 12px;
   display: flex;
   gap: 4px;
@@ -1417,7 +1417,7 @@ onBeforeUnmount(() => {
 }
 .rk-sug {
   margin-top: 10px;
-  border-top: 1px dashed #e5e7eb;
+  border-top: 1px dashed var(--line);
   padding-top: 10px;
 }
 .rk-sug-head {
@@ -1437,7 +1437,7 @@ onBeforeUnmount(() => {
   font-family: inherit;
   font-size: 13px;
   line-height: 1.75;
-  background: #f0fdf4;
+  background: rgba(34, 197, 94, 0.12);
   border: 1px solid #bbf7d0;
   border-radius: 6px;
   padding: 8px 12px;
@@ -1446,12 +1446,12 @@ onBeforeUnmount(() => {
 .rk-sug-none {
   margin-top: 6px;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .rk-sug-why {
   margin-top: 6px;
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
   line-height: 1.6;
 }
 </style>

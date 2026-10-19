@@ -395,7 +395,7 @@ onBeforeUnmount(stopPoll)
   gap: 12px;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
   line-height: 1.7;
   margin: 0 0 10px;
@@ -419,7 +419,7 @@ onBeforeUnmount(stopPoll)
 .mono {
   font-family: Consolas, Monaco, monospace;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .polling {
   font-size: 12px;
@@ -431,16 +431,16 @@ onBeforeUnmount(stopPoll)
 .wb-error {
   margin-bottom: 10px;
   padding: 8px 12px;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.12);
   border: 1px solid #fecaca;
   border-radius: 6px;
-  color: #b91c1c;
+  color: var(--risk-high);
   font-size: 12px;
 }
 .readonly-tip {
   margin-top: 10px;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -448,8 +448,8 @@ onBeforeUnmount(stopPoll)
 .report-box {
   max-height: 62vh;
   overflow: auto;
-  background: #fafbfc;
-  border: 1px solid #eef0f3;
+  background: var(--bg-hover);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px 20px;
 }
@@ -465,7 +465,7 @@ onBeforeUnmount(stopPoll)
   margin: 6px 0;
   line-height: 1.8;
   font-size: 13px;
-  color: #374151;
+  color: var(--ink-2);
 }
 .md-render :deep(ul) {
   margin: 6px 0;
@@ -474,7 +474,7 @@ onBeforeUnmount(stopPoll)
 .md-render :deep(li) {
   font-size: 13px;
   line-height: 1.8;
-  color: #374151;
+  color: var(--ink-2);
 }
 .md-render :deep(table) {
   width: 100%;
@@ -482,13 +482,13 @@ onBeforeUnmount(stopPoll)
   margin: 8px 0;
 }
 .md-render :deep(td) {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--line);
   padding: 5px 8px;
   font-size: 12px;
-  color: #374151;
+  color: var(--ink-2);
 }
 .md-render :deep(code) {
-  background: #f1f5f9;
+  background: var(--bg-hover);
   padding: 1px 4px;
   border-radius: 3px;
   font-size: 12px;

@@ -102,8 +102,8 @@ function href(c) {
   overflow-x: auto;
 }
 .viewer {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
   min-height: 320px;
@@ -128,6 +128,6 @@ function href(c) {
 .img-tip {
   margin-top: 8px;
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 </style>

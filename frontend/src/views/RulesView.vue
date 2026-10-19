@@ -703,7 +703,7 @@ onMounted(async () => {
 }
 .sub {
   margin: 0;
-  color: #98a1b3;
+  color: var(--ink-3);
   font-size: 12px;
 }
 .head-btns {
@@ -727,7 +727,7 @@ onMounted(async () => {
 }
 .tb-label {
   font-size: 12px;
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .spacer {
   flex: 1;
@@ -740,7 +740,7 @@ onMounted(async () => {
   margin-right: 4px;
 }
 .muted {
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .mono {
   font-family: Consolas, Monaco, monospace;
@@ -748,11 +748,11 @@ onMounted(async () => {
   color: #475569;
 }
 .ellipsis {
-  color: #6b7280;
+  color: var(--ink-3);
 }
 .form-hint {
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
   line-height: 1.6;
   margin-top: 2px;
 }

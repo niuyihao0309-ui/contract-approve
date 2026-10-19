@@ -93,7 +93,7 @@ onMounted(load)
   gap: 8px;
   font-size: 12px;
   padding: 4px 0;
-  border-bottom: 1px solid #f5f6f8;
+  border-bottom: 1px solid var(--line);
 }
 .sample-name {
   flex: 1;
@@ -102,12 +102,12 @@ onMounted(load)
   white-space: nowrap;
 }
 .sample-ext {
-  color: #98a1b3;
+  color: var(--ink-3);
 }
 .tip {
   margin-top: 8px;
   font-size: 11px;
-  color: #98a1b3;
+  color: var(--ink-3);
   line-height: 1.6;
 }
 </style>
